@@ -9,6 +9,7 @@ export const useProductStore = create((set, get) => ({
   products: [],
   loading: false,
   error: null,
+  currentProduct: {},
 
   // form state
   formData: {
@@ -63,6 +64,45 @@ export const useProductStore = create((set, get) => ({
       toast.success("Product Deleted Successfully");
     } catch (error) {
       console.log("Error in deleteProduct");
+      toast.error("Something went wrong");
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  fetchProduct: async (id) => {
+    set({ loading: true });
+
+    try {
+      const response = await axios.get(`${BASE_URL}/api/products/${id}`);
+      set({
+        currentProduct: response.data.data,
+        formData: response.data.data,
+        error: null,
+      });
+    } catch (error) {
+      console.log("Error in Fetch Product", error);
+      set({ error: "Something went wrong", currentProduct: null });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  updateProduct: async (id) => {
+    set({ loading: true });
+    try {
+      const { formData } = get();
+      const response = await axios.put(
+        `${BASE_URL}/api/products/${id}`,
+        formData
+      );
+
+      console.log("We are setting new data", response.data.data);
+
+      set({ currentProduct: response.data.data });
+      toast.success("Product Updated Successfully");
+    } catch (error) {
+      console.log("Error in updateProduct", error);
       toast.error("Something went wrong");
     } finally {
       set({ loading: false });
